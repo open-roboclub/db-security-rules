@@ -17,9 +17,8 @@ function getAdminFirestore() {
 }
 async function setupAdmin() {
     const admin = getAdminFirestore();
-    const setupUser = admin.collection('/users').doc(myEmail);
+    const setupUser = admin.collection('/users').doc(myId);
     await setupUser.set({ isAdmin: true, name: "Rishabh Sharma", email: myEmail });
-
 }
 
 beforeEach(async () => {
@@ -27,6 +26,8 @@ beforeEach(async () => {
 });
 
 describe('AMURoboclub app DB Unit Testing', () => {
+
+    // Project Collection Tests
     it('Can read projects without auth', async () => {
         const project_id = 'project_abc';
         const db = getFirestore(null);
@@ -49,6 +50,32 @@ describe('AMURoboclub app DB Unit Testing', () => {
 
         const testRead = db.collection('/projects').doc(project_id);
         await firebase.assertSucceeds(testRead.set({ date: "date", description: "description", fileUrl: "fileUrl", link: "link", name: "name", progress: "progress", teamMembers: "teamMembers" }));
+    });
+
+    //Feedback Collection Tests
+    it('Can\'t read feedback without admin access and without auth', async () => {
+        await setupAdmin();
+        const feedback_id = 'feedback_id';
+        const db = getFirestore(null);
+
+        const testRead = db.collection('/feedbacks').doc(feedback_id);
+        await firebase.assertFails(testRead.get());
+    });
+    it('Can\'t read feedback without admin access but with auth', async () => {
+        await setupAdmin();
+        const feedback_id = 'feedback_id';
+        const db = getFirestore(theirAuth);
+
+        const testRead = db.collection('/feedbacks').doc(feedback_id);
+        await firebase.assertFails(testRead.get());
+    });
+    it('Can read feedback with admin access ', async () => {
+        await setupAdmin();
+        const feedback_id = 'feedback_id';
+        const db = getFirestore(myAuth);
+
+        const testRead = db.collection('/feedbacks').doc(feedback_id);
+        await firebase.assertSucceeds(testRead.get());
     });
 });
 
