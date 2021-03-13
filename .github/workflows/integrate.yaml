@@ -3,8 +3,8 @@ name: DB Rules & Unit Test Continuous Integration
 on:
   push:
     branches: [master]
-  pull_request_target:
-    types: [assigned, opened, synchronize, reopened]
+  pull_request:
+    branches: [master]
 
 jobs:
   test_pull_request:
