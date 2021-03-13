@@ -17,7 +17,7 @@ service cloud.firestore {
   //Collection Access Rules
     match /users/{userId}{
       allow read;
-      allow create: if (resource.data.uid == request.auth.uid) && documentFieldsCheckOut(["about","batch","branch","contact","cvLink","email","fbId","instaId","interests","isAdmin","isMember","linkedinId","name","position","profileImageUrl","quote"],[]);
+      allow create: if (resource.data.uid == request.auth.uid) && documentFieldsCheckOut(["uid","about","batch","branch","contact","cvLink","email","fbId","instaId","interests","isAdmin","isMember","linkedinId","name","position","profileImageUrl","quote"],[]);
       allow update: if (isAdmin() || resource.data.uid == request.auth.uid) && editOnlyChangesField(["about","batch","branch","contact","cvLink","fbId","instaId","interests","linkedinId","name","position","profileImageUrl","quote"]);
     }
     
