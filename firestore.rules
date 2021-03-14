@@ -41,7 +41,42 @@ service cloud.firestore {
         docData.link is string &&
         docData.name is string &&
         docData.progress is string &&
-        docData.teamMembers is string;
+        docData.projectImg[0] is string &&
+        docData.teamMembers[0] is string;
+    }
+    function contributorFieldsTypeValidate(docData) {
+      return docData.amount is string &&
+        docData.date is string &&
+        docData.description is string &&
+        docData.name is string &&
+        docData.representativeImg is string;
+    }
+    function feedbackFieldsTypeValidate(docData) {
+      return docData.dateTime is string &&
+        docData.feedback is string &&
+        docData.isMember is bool;
+    }
+    function pushTokenFieldsTypeValidate(docData) {
+      return docData.androidId is string &&
+        docData.createdAt is timestamp &&
+        docData.deviceToken is string &&
+        docData.platform is bool;
+    }
+    function notificationFieldsTypeValidate(docData) {
+      return docData.date is string &&
+        docData.link is string &&
+        docData.msg is string &&
+        docData.title is string;
+    }
+    function eventFieldsTypeValidate(docData) {
+      return docData.date is string &&
+        docData.details is string &&
+        docData.endTime is string &&
+        docData.eventName is string &&
+        docData.place is string &&
+        docData.posterURL is string &&
+        docData.regFormLink is string &&
+        docData.startTime is string;
     }
   
   //Collection Access Rules
@@ -58,24 +93,24 @@ service cloud.firestore {
     
     match /contributors/{contributorsId}{
       allow read;
-      allow create: if isAdmin() && documentFieldsCheckOut(["amount","date","description","name","representativeImg"],[]);
-      allow update:if isAdmin() && editOnlyChangesField(["amount","date","description","name","representativeImg"]);
+      allow create: if isAdmin() && documentFieldsCheckOut(["amount","date","description","name","representativeImg"],[]) && contributorFieldsTypeValidate(request.resource.data);
+      allow update:if isAdmin() && editOnlyChangesField(["amount","date","description","name","representativeImg"]) && contributorFieldsTypeValidate(request.resource.data);
     }
     match /feedbacks/{feedbacksId}{
       allow read: if isAdmin();
-      allow create: if documentFieldsCheckOut(["dateTime","feedback","isMember"],[]);
+      allow create: if documentFieldsCheckOut(["dateTime","feedback","isMember"],[]) && feedbackFieldsTypeValidate(request.resource.data) && feedbackFieldsTypeValidate(request.resource.data);
       allow update: if false;
     }
     
     match /projects/{projectsId}{
       allow read;
-      allow create: if isAdmin() && documentFieldsCheckOut(["date","description","fileUrl","link","name","progress","teamMembers"],[]) && projectFieldsTypeValidate(request.resource.data);
-      allow update: if isAdmin() && editOnlyChangesField(["date","description","fileUrl","link","name","progress","teamMembers"]) && projectFieldsTypeValidate(request.resource.data);
+      allow create: if isAdmin() && documentFieldsCheckOut(["date","description","fileUrl","link","name","progress","projectImg","teamMembers"],[]) && projectFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["date","description","fileUrl","link","name","progress","projectImg","teamMembers"]) && projectFieldsTypeValidate(request.resource.data);
     }
     
     match /pushTokens/{pushTokensId}{
       allow read: if isAdmin();
-      allow create,update: if documentFieldsCheckOut(["androidId","createdAt","deviceToken","platform"],[]);
+      allow create,update: if documentFieldsCheckOut(["androidId","createdAt","deviceToken","platform"],[]) && pushTokenFieldsTypeValidate(request.resource.data);
     }
     
     match /teams/{teamsId}{
@@ -89,14 +124,14 @@ service cloud.firestore {
     }
     match /notifications/{notificationsId}{
     	allow read;
-    	allow create: if isAdmin() && documentFieldsCheckOut(["date","link","msg","title"],[]);
-      allow update: if isAdmin() && editOnlyChangesField(["date","link","msg","title"]);
+    	allow create: if isAdmin() && documentFieldsCheckOut(["date","link","msg","title"],[]) && notificationFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["date","link","msg","title"]) && notificationFieldsTypeValidate(request.resource.data);
       allow delete : if isAdmin();
     }
     match /events/{eventsId}{
     	allow read;
-    	allow create: if isAdmin() && documentFieldsCheckOut(["date","details","endTime","eventName","place","posterURL","regFormLink","startTime"],[]);
-      allow update: if isAdmin() && editOnlyChangesField(["date","details","endTime","eventName","place","posterURL","regFormLink","startTime"]);
+    	allow create: if isAdmin() && documentFieldsCheckOut(["date","details","endTime","eventName","place","posterURL","regFormLink","startTime"],[]) && eventFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["date","details","endTime","eventName","place","posterURL","regFormLink","startTime"]) && eventFieldsTypeValidate(request.resource.data);
       allow delete: if isAdmin();
     }
     match /downloads/{downloadsId}{
