@@ -18,32 +18,28 @@ function getAdminFirestore() {
 async function setupAdmin() {
     const admin = getAdminFirestore();
     const setupUser = admin.collection('/users').doc(myId);
-    await setupUser.set({ isAdmin: true, name: "Rishabh Sharma", email: myEmail });
+    await setupUser.set({ isAdmin: true, name: "abc", email: myEmail });
 }
 
 beforeEach(async () => {
     await firebase.clearFirestoreData({ projectId: MY_PROJECT_ID });
 });
 
+// Nemonics
+// NT = Negative Test, PT = Positive Test
+// {-} = Excluded , {+} = Included
+
 describe('AMURoboclub app DB Unit Testing', () => {
 
     // Project Collection Tests
-    it('Can read projects without auth', async () => {
+    it('PT -> Read Projects:  {-} Auth', async () => {
         const project_id = 'project_abc';
         const db = getFirestore(null);
         const testRead = db.collection('/projects').doc(project_id);
         await firebase.assertSucceeds(testRead.get());
     });
 
-    it('Can\'t post projects without All required fields', async () => {
-        await setupAdmin();
-        const project_id = 'project_abc';
-        const db = getFirestore(myAuth);
-
-        const testRead = db.collection('/projects').doc(project_id);
-        await firebase.assertFails(testRead.set({ "name": "Rishabh Sharma" }));
-    });
-    it('Can post projects with all Required Fields and Admin access', async () => {
+    it('PT -> Create Projects: {+} All Required Fields, {+} Admin Access', async () => {
         await setupAdmin();
         const project_id = 'project_abc';
         const db = getFirestore(myAuth);
@@ -51,9 +47,59 @@ describe('AMURoboclub app DB Unit Testing', () => {
         const testRead = db.collection('/projects').doc(project_id);
         await firebase.assertSucceeds(testRead.set({ date: "date", description: "description", fileUrl: "fileUrl", link: "link", name: "name", progress: "progress", teamMembers: "teamMembers" }));
     });
+    it('NT -> Create Projects: {-} All Required Fields, {+} Admin Access', async () => {
+        await setupAdmin();
+        const project_id = 'project_abc';
+        const db = getFirestore(myAuth);
+
+        const testRead = db.collection('/projects').doc(project_id);
+        await firebase.assertFails(testRead.set({ "name": "abc" }));
+    });
+    it('NT -> Create Projects: {+} All Required Fields, {-} Admin access, {+} Auth', async () => {
+        await setupAdmin();
+        const project_id = 'project_abc';
+        const db = getFirestore(theirAuth);
+
+        const testRead = db.collection('/projects').doc(project_id);
+        await firebase.assertFails(testRead.set({ date: "date", description: "description", fileUrl: "fileUrl", link: "link", name: "name", progress: "progress", teamMembers: "teamMembers" }));
+    });
+    it('NT -> Create Projects: {-} All Required Fields, {-} Admin access, {+} Auth', async () => {
+        await setupAdmin();
+        const project_id = 'project_abc';
+        const db = getFirestore(theirAuth);
+
+        const testRead = db.collection('/projects').doc(project_id);
+        await firebase.assertFails(testRead.set({ date: "date", description: "description", link: "link", name: "name", progress: "progress", teamMembers: "teamMembers" }));
+    });
+    it('PT -> Update Projects: {+} Only Allowed Fields, {+} Admin access', async () => {
+        await setupAdmin();
+        const project_id = 'project_abc';
+        const db = getFirestore(myAuth);
+        const admin = getAdminFirestore();
+
+        const testRead = db.collection('/projects').doc(project_id);
+        await admin.collection('/projects').doc(project_id).set({ date: "date", description: "description", fileUrl: "fileUrl", link: "link", name: "name", progress: "progress", teamMembers: "teamMembers" });
+        await firebase.assertSucceeds(testRead.update({ date: "date_new" }));
+    });
+    it('NT -> Update Projects: {+} Only Allowed Fields, {-} Admin access', async () => {
+        await setupAdmin();
+        const project_id = 'project_abc';
+        const db = getFirestore(theirAuth);
+
+        const testRead = db.collection('/projects').doc(project_id);
+        await firebase.assertFails(testRead.update({ date: "date", description: "description", link: "link", name: "name", progress: "progress", teamMembers: "teamMembers" }));
+    });
+    it('NT -> Update Projects: {-} Only Allowed Fields, {+} Admin access', async () => {
+        await setupAdmin();
+        const project_id = 'project_abc';
+        const db = getFirestore(myAuth);
+
+        const testRead = db.collection('/projects').doc(project_id);
+        await firebase.assertFails(testRead.update({ date: "date", description: "description", link: "link", name: "name", progress: "progress", teamMembers: "teamMembers", uid: "uid" }));
+    });
 
     //Feedback Collection Tests
-    it('Can\'t read feedback without admin access and without auth', async () => {
+    it('NT -> Read Feedbacks: {-} Auth', async () => {
         await setupAdmin();
         const feedback_id = 'feedback_id';
         const db = getFirestore(null);
@@ -61,7 +107,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         const testRead = db.collection('/feedbacks').doc(feedback_id);
         await firebase.assertFails(testRead.get());
     });
-    it('Can\'t read feedback without admin access but with auth', async () => {
+    it('NT -> Read Feedbacks: {-} Admin Access, {+} Auth', async () => {
         await setupAdmin();
         const feedback_id = 'feedback_id';
         const db = getFirestore(theirAuth);
@@ -69,7 +115,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         const testRead = db.collection('/feedbacks').doc(feedback_id);
         await firebase.assertFails(testRead.get());
     });
-    it('Can read feedback with admin access ', async () => {
+    it('PT -> Read Feedbacks: {+} Admin Access', async () => {
         await setupAdmin();
         const feedback_id = 'feedback_id';
         const db = getFirestore(myAuth);
