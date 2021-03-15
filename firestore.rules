@@ -60,7 +60,7 @@ service cloud.firestore {
       return docData.androidId is string &&
         docData.createdAt is timestamp &&
         docData.deviceToken is string &&
-        docData.platform is bool;
+        docData.platform is string;
     }
     function notificationFieldsTypeValidate(docData) {
       return docData.date is string &&
@@ -78,6 +78,12 @@ service cloud.firestore {
         docData.regFormLink is string &&
         docData.startTime is string;
     }
+    function downloadsPageTypeValidate(docData) {
+      return docData.file is string &&
+      docData.name is string && 
+      docData.size is string &&
+      docData.url is string
+    }
   
   //Collection Access Rules
     match /users/{userId}{
@@ -87,9 +93,7 @@ service cloud.firestore {
     }
     
     match /currentTeam/{singleId}{
-      allow read: if isAuthenticated();
-      allow write: if isAdmin()
-      allow update: if isAdmin()
+      allow read;
     }
     
     match /contributors/{contributorsId}{
@@ -111,7 +115,8 @@ service cloud.firestore {
     
     match /pushTokens/{pushTokensId}{
       allow read: if isAdmin();
-      allow create,update: if documentFieldsCheckOut(["androidId","createdAt","deviceToken","platform"],[]) && pushTokenFieldsTypeValidate(request.resource.data);
+      allow create: if isAdmin() && documentFieldsCheckOut(["androidId","createdAt","deviceToken","platform"],[]) && pushTokenFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["androidId","createdAt","deviceToken","platform"]) && request.resource.data.androidId==resource.data.androidId && pushTokenFieldsTypeValidate(request.resource.data);
     }
     
     match /teams/{teamsId}{
@@ -136,9 +141,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     match /downloads/{downloadsId}{
-    	allow read: if isAuthenticated();
-    	allow create: if isAdmin() && documentFieldsCheckOut(["file", "name", "size", "url"],[]);
-      allow update: if isAdmin() && editOnlyChangesField(["file", "name", "size", "url"]);
+    	allow read;
+    	allow create: if isAdmin() && documentFieldsCheckOut(["file", "name", "size", "url"],[]) && downloadsPageTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["file", "name", "size", "url"]) && downloadsPageTypeValidate(request.resource.data);
     }
     match /news/{newsId}{
     	allow read;
