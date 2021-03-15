@@ -1,0 +1,32 @@
+{
+  "name": "roboclub-db-rules",
+  "version": "1.0.0",
+  "description": "Firestore DB Rules for AMURoboclub",
+  "scripts": {
+    "lint": "eslint --cache --fix",
+    "test": "mocha tests --exit",
+    "emulate-tests": "firebase emulators:exec --project amu-roboclub 'npm test'"
+  },
+  "author": "Rishabh Sharma",
+  "license": "ISC",
+  "devDependencies": {
+    "@firebase/testing": "^0.20.11",
+    "eslint": "^7.22.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "firebase-tools": "^9.6.1",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.4",
+    "mocha": "^8.3.1",
+    "prettier": "2.2.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "npm run lint",
+    "*.{js,css,md}": "prettier --write"
+  }
+}

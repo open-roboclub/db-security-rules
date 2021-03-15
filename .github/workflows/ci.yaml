@@ -1,4 +1,4 @@
-name: DB Rules & Unit Test Continuous Integration
+name: Tests
 
 on:
   push:
@@ -14,11 +14,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-      - name: Install Firebase Emulator Suite
-        run: npm install -g firebase-tools
       - name: Install dependencies
         run: npm install
-        working-directory: test
       - name: Run all the tests
-        working-directory: test
-        run: firebase emulators:exec --project amu-roboclub 'npm test'
+        run: npm run emulate-tests
