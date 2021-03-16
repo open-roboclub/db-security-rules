@@ -325,7 +325,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('PT -> Create Projects: {+} All Required Fields, {+} Admin Access, {+} Valid Field Type', async () => {
+  it('PT -> Create Projects: {+} All Required Fields, {+} Admin Access, {+} Valid Field Types', async () => {
     await setupAdmin();
     const projectId = 'project_abc';
     const db = getFirestore(myAuth);
@@ -344,7 +344,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Projects: {+} All Required Fields, {+} Admin Access, {-} Valid Field Type', async () => {
+  it('NT -> Create Projects: {+} All Required Fields, {+} Admin Access, {-} Valid Field Types', async () => {
     await setupAdmin();
     const projectId = 'project_abc';
     const db = getFirestore(myAuth);
