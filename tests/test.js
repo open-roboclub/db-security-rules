@@ -325,7 +325,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('PT -> Create Projects: {+} All Required Fields, {+} Admin Access, {+} Valid Field Types', async () => {
+  it('PT -> Create Projects: {+} All Required Fields, {+} Admin Access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const projectId = 'project_abc';
     const db = getFirestore(myAuth);
@@ -344,7 +344,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Projects: {+} All Required Fields, {+} Admin Access, {-} Valid Field Types', async () => {
+  it('NT -> Create Projects: {+} All Required Fields, {+} Admin Access, {-} Valid Field Type', async () => {
     await setupAdmin();
     const projectId = 'project_abc';
     const db = getFirestore(myAuth);
@@ -516,7 +516,210 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/feedbacks').doc(feedbackId);
     await firebase.assertSucceeds(testRead.get());
   });
-});
+
+  //Downloads page tests
+  it('PT -> Read Downloads: {-} Auth', async () => {
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(null);
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await firebase.assertSucceeds(testRead.get());
+  });
+  it('PT -> Create Downloads: {+} Admin Access {+} Only Allowed Fields {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await firebase.assertSucceeds(testRead.set({ file : "file", name : "name", size : "size", url : "url" }));
+  });
+  it('NT -> Create Downloads: {+} Admin Access {+} Only Allowed Fields {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await firebase.assertFails(testRead.set({ file : 1, name : "name", size : "size", url : "url" }));
+  });
+  it('NT -> Create Downloads: {+} Admin access {-} Only Allowed Fields', async () =>{
+    await setupAdmin();
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await firebase.assertFails(testRead.set({ file : "file", name : "name", size : "size", url : "url", date : "date" }));
+  });
+  it('NT -> Create Downloads: {-} Admin access {+} Only Allowed Fields {+} Auth {+} Valid Field Type ', async () =>{
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await firebase.assertFails(testRead.set({ file : "file", name : "name", size : "size", url : "url" }));
+  });
+  it('PT -> Update Downlods: {+} Only Allowed Fields, {+} Admin access {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await admin.collection('/downloads').doc(downloads_Id).set({ file : "file", name : "name", size : "size", url : "url" });
+    await firebase.assertSucceeds(testRead.update({ file: "file_new" }));
+  });
+  it('NT -> Update Downloads: {+} Only Allowed Fields, {-} Admin access {+} Auth {+} Valid Field Type', async () => {
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await admin.collection('/downloads').doc(downloads_Id).set({ file : "file", name : "name", size : "size", url : "url" });
+    await firebase.assertFails(testRead.update({ file: "file_new" }));
+  });
+  it('NT -> Update Downloads: {-} Only Allowed Fields, {+} Admin access', async () => {
+    await setupAdmin();
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await admin.collection('/downloads').doc(downloads_Id).set({ file : "file", name : "name", size : "size", url : "url" });
+    await firebase.assertFails(testRead.update({ date: "date" }));
+  });
+  it('NT -> Update Downloads: {+} Only Allowed Fields, {+} Admin access {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const downloads_Id = 'downloadsId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/downloads').doc(downloads_Id);
+    await admin.collection('/downloads').doc(downloads_Id).set({ file : "file", name : "name", size : "size", url : "url" });
+    await firebase.assertFails(testRead.update({ file: 2 }));
+  });
+
+  //Current team tests
+  it('PT -> Read Current team: {-} Auth', async () => {
+    const singleId = 'single_Id';
+    const db = getFirestore(null);
+
+    const testRead = db.collection('/currentTeam').doc(singleId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+  it('NT -> Create current team: {+} Admin access {+} Only Allowed Fields', async () => {
+    await setupAdmin();
+    const singleId = 'single_Id';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/currentTeam').doc(singleId);
+    await firebase.assertFails(testRead.set({  data : "email" }));
+  });
+
+  //Push tokens tests
+  it('PT -> Read pushTokens: {+} Admin access', async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+
+  it('NT -> Read pushTokens: {-} Admin access {+} Auth', async () => {
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await firebase.assertFails(testRead.get());
+  });
+  it('PT -> Create pushTokens: {+} Admin access {+} Only Allowed Fields {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    var current_timestamp = new Date();
+    await firebase.assertSucceeds(testRead.set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" }));
+  });
+  it('NT -> Create pushTokens: {-} Admin access {+} Only Allowed Fields {+} Valid Field Type', async () => {
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await firebase.assertFails(testRead.set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" }));
+  });
+  it('NT -> Create pushTokens: {+} Admin access {-} Only Allowed Fields {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await firebase.assertFails(testRead.set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android", location : "location" }));
+  });
+  it('NT -> Create pushTokens: {+} Admin access {+} Only Allowed Fields {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await firebase.assertFails(testRead.set({ androidId : "id", createdAt : current_timestamp, deviceToken : 0, platform : "android" }));
+  });
+  it('PT -> Update pushTokens: {+} Admin access {+} Request Id == Resource Id {+} Valid Field Type {+} Only Allowed Fields', async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await admin.collection('/pushTokens').doc(pushTokensId).set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" });
+    await firebase.assertSucceeds(testRead.update({ deviceToken : "token_new"  }));
+  });
+  it('NT -> Update pushTokens: {+} Admin access {-} Resource ID == Request ID {+} Only Allowed Fields {+} Valid Field Type' , async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await admin.collection('/pushTokens').doc(pushTokensId).set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" });
+    await firebase.assertFails(testRead.update({ androidId : "id_new", createdAt : current_timestamp }));
+  });
+  it('NT -> Update pushTokens: {-} Admin access {+} Resource ID == Request ID {+} Valid Field Type {+} Only Allowed Fields', async () => {
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await admin.collection('/pushTokens').doc(pushTokensId).set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" });
+    await firebase.assertFails(testRead.update({  deviceToken : "token_new" }));
+  });
+  it('NT -> Update pushTokens: {+} Admin access {+} Resource ID == Request ID {-} Valid Field Type {+} Only Allowed Fields', async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await admin.collection('/pushTokens').doc(pushTokensId).set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" });
+    await firebase.assertFails(testRead.update({  deviceToken : 0 }));
+  });
+  it('NT -> Update pushTokens: {+} Admin access {+} Resource ID == Request ID {+} Valid Field Type {-} Only Allowed Fields', async () => {
+    await setupAdmin();
+    const pushTokensId = 'pushTokens_Id';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    var current_timestamp = new Date();
+    const testRead = db.collection('/pushTokens').doc(pushTokensId);
+    await admin.collection('/pushTokens').doc(pushTokensId).set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" });
+    await firebase.assertFails(testRead.update({  location : "location" }));
+  });
+
+
+  });
 
 after(async () => {
   await firebase.clearFirestoreData({ projectId: MY_PROJECT_ID });

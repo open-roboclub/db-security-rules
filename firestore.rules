@@ -68,7 +68,7 @@ service cloud.firestore {
       return docData.androidId is string &&
       docData.createdAt is timestamp &&
       docData.deviceToken is string &&
-      docData.platform is bool;
+      docData.platform is string;
     }
 
     function notificationFieldsTypeValidate(docData) {
@@ -88,6 +88,12 @@ service cloud.firestore {
       docData.regFormLink is string &&
       docData.startTime is string;
     }
+    function downloadFieldsTypeValidate(docData) {
+      return docData.file is string &&
+      docData.name is string &&
+      docData.size is string &&
+      docData.url is string
+    }
 
     // Collection Access Rules
     match /users/{userId} {
@@ -96,9 +102,8 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (isAdmin() || userId == request.auth.uid) && editOnlyChangesField(["about", "batch", "branch", "contact", "cvLink", "fbId", "instaId", "interests", "linkedinId", "name", "position", "profileImageUrl", "quote"]) && userFieldsTypeValidate(request.resource.data);
     }
 
-    match /currentTeam/{singleId} {
+    match /currentTeam/{singleId}{
       allow read;
-      allow write: if false;
     }
 
     match /contributors/{contributorsId} {
@@ -119,9 +124,10 @@ service cloud.firestore {
       allow update: if isAdmin() && editOnlyChangesField(["date", "description", "fileUrl", "link", "name", "progress", "projectImg", "teamMembers"]) && projectFieldsTypeValidate(request.resource.data);
     }
 
-    match /pushTokens/{pushTokensId} {
+    match /pushTokens/{pushTokensId}{
       allow read: if isAdmin();
-      allow create, update: if documentFieldsCheckOut(["androidId", "createdAt", "deviceToken", "platform"], []) && pushTokenFieldsTypeValidate(request.resource.data);
+      allow create: if isAdmin() && documentFieldsCheckOut(["androidId","createdAt","deviceToken","platform"],[]) && pushTokenFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["androidId","createdAt","deviceToken","platform"]) && request.resource.data.androidId==resource.data.androidId && pushTokenFieldsTypeValidate(request.resource.data);
     }
 
     match /teams/{teamsId} {
@@ -148,9 +154,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    match /downloads/{downloadsId} {
-      allow read;
-      allow create, update: if isAdmin();
+    match /downloads/{downloadsId}{
+    	allow read;
+    	allow create: if isAdmin() && documentFieldsCheckOut(["file", "name", "size", "url"],[]) && downloadFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["file", "name", "size", "url"]) && downloadFieldsTypeValidate(request.resource.data);
     }
 
     match /news/{newsId} {
