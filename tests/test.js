@@ -638,7 +638,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
   });
 
   // Notifications Collection Tests
-  it('PT -> Read Notifications:  {-} Auth', async () => {
+  it('PT -> Read Notification:  {-} Auth', async () => {
     const notificationId = 'notificationId';
     const db = getFirestore(null);
     const testRead = db.collection('/notifications').doc(notificationId);
@@ -780,6 +780,184 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const db = getFirestore(theirAuth);
 
     const testRead = db.collection('/notifications').doc(notificationId);
+    await firebase.assertFails(testRead.delete());
+  });
+
+  // Events Collection Tests
+  it('PT -> Read Event:  {-} Auth', async () => {
+    const eventId = 'eventId';
+    const db = getFirestore(null);
+    const testRead = db.collection('/events').doc(eventId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+
+  it('PT -> Create Event: {+} All Required Fields, {+} Admin Access, {+} Valid Field Types', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/events').doc(eventId);
+    await firebase.assertSucceeds(
+      testRead.set({
+        date: 'date',
+        details: 'details',
+        endTime: 'endTime',
+        eventName: 'eventName',
+        place: 'place',
+        posterURL: 'posterURL',
+        regFormLink: 'regFormLink',
+        startTime: 'startTime',
+      }),
+    );
+  });
+  it('NT -> Create Event: {-} All Required Fields, {+} Admin Access, {+} Valid Field Types', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/events').doc(eventId);
+    await firebase.assertFails(
+      testRead.set({
+        date: 'date',
+        details: 'details',
+        endTime: 'endTime',
+        eventName: 'eventName',
+        posterURL: 'posterURL',
+        regFormLink: 'regFormLink',
+        startTime: 'startTime',
+      }),
+    );
+  });
+  it('NT -> Create Event: {+} All Required Fields, {-} Admin Access, {+} Auth, {+} Valid Field Types', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/events').doc(eventId);
+    await firebase.assertFails(
+      testRead.set({
+        date: 'date',
+        details: 'details',
+        endTime: 'endTime',
+        eventName: 'eventName',
+        place: 'place',
+        posterURL: 'posterURL',
+        regFormLink: 'regFormLink',
+        startTime: 'startTime',
+      }),
+    );
+  });
+  it('NT -> Create Event: {+} All Required Fields, {+} Admin Access, {-} Valid Field Types', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/events').doc(eventId);
+    await firebase.assertFails(
+      testRead.set({
+        date: 'date',
+        details: 'details',
+        endTime: 'endTime',
+        eventName: 'eventName',
+        place: 'place',
+        posterURL: 'posterURL',
+        regFormLink: true,
+        startTime: 'startTime',
+      }),
+    );
+  });
+  it('PT -> Update Event: {+} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/events').doc(eventId);
+    await admin.collection('/events').doc(eventId).set({
+      date: 'date',
+      details: 'details',
+      endTime: 'endTime',
+      eventName: 'eventName',
+      place: 'place',
+      posterURL: 'posterURL',
+      regFormLink: 'regFormLink',
+      startTime: 'startTime',
+    });
+    await firebase.assertSucceeds(testRead.update({ place: 'new_place' }));
+  });
+  it('NT -> Update Event: {-} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/events').doc(eventId);
+    await admin.collection('/events').doc(eventId).set({
+      date: 'date',
+      details: 'details',
+      endTime: 'endTime',
+      eventName: 'eventName',
+      place: 'place',
+      posterURL: 'posterURL',
+      regFormLink: 'regFormLink',
+      startTime: 'startTime',
+    });
+    await firebase.assertFails(
+      testRead.update({ place: 'new_place', uid: 'abc' }),
+    );
+  });
+  it('NT -> Update Event: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(theirAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/events').doc(eventId);
+    await admin.collection('/events').doc(eventId).set({
+      date: 'date',
+      details: 'details',
+      endTime: 'endTime',
+      eventName: 'eventName',
+      place: 'place',
+      posterURL: 'posterURL',
+      regFormLink: 'regFormLink',
+      startTime: 'startTime',
+    });
+    await firebase.assertFails(testRead.update({ place: 'new_place' }));
+  });
+  it('NT -> Update Event: {+} Only Allowed Fields, {+} Admin access, {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/eventId').doc(eventId);
+    await admin.collection('/eventId').doc(eventId).set({
+      date: 'date',
+      details: 'details',
+      endTime: 'endTime',
+      eventName: 'eventName',
+      place: 'place',
+      posterURL: 'posterURL',
+      regFormLink: 'regFormLink',
+      startTime: 'startTime',
+    });
+    await firebase.assertFails(testRead.update({ date: 15 }));
+  });
+  it('PT -> Delete Event: {+} Admin Access', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/events').doc(eventId);
+    await firebase.assertSucceeds(testRead.delete());
+  });
+  it('NT -> Delete Event: {-} Admin Access, {+} Auth', async () => {
+    await setupAdmin();
+    const eventId = 'eventId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/events').doc(eventId);
     await firebase.assertFails(testRead.delete());
   });
 
