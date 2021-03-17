@@ -64,6 +64,7 @@ service cloud.firestore {
       docData.feedback is string &&
       docData.isMember is bool;
     }
+    
     function pushTokenFieldsTypeValidate(docData) {
       return docData.androidId is string &&
       docData.createdAt is timestamp &&
