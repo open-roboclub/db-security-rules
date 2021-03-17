@@ -717,8 +717,6 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await admin.collection('/pushTokens').doc(pushTokensId).set({ androidId : "id", createdAt : current_timestamp, deviceToken : "token", platform : "android" });
     await firebase.assertFails(testRead.update({  location : "location" }));
   });
-
-
   });
 
 after(async () => {
