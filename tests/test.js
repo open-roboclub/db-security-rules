@@ -490,6 +490,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/projects').doc(projectId);
     await firebase.assertFails(testRead.delete());
   });
+
   // Contributors Collection Tests
   it('PT -> Read Contributors:  {-} Auth', async () => {
     const contributorId = 'contributor_abc';
@@ -633,6 +634,152 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const db = getFirestore(myAuth);
 
     const testRead = db.collection('/contributors').doc(contributorId);
+    await firebase.assertFails(testRead.delete());
+  });
+
+  // Notifications Collection Tests
+  it('PT -> Read Notifications:  {-} Auth', async () => {
+    const notificationId = 'notificationId';
+    const db = getFirestore(null);
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+
+  it('PT -> Create Notification: {+} All Required Fields, {+} Admin Access, {+} Valid Field Types', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await firebase.assertSucceeds(
+      testRead.set({
+        date: 'date',
+        link: 'link',
+        msg: 'msg',
+        title: 'title',
+      }),
+    );
+  });
+  it('NT -> Create Notification: {-} All Required Fields, {+} Admin Access, {+} Valid Field Types', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await firebase.assertFails(
+      testRead.set({
+        date: 'date',
+        link: 'link',
+        title: 'title',
+      }),
+    );
+  });
+  it('NT -> Create Notification: {+} All Required Fields, {-} Admin Access, {+} Auth, {+} Valid Field Types', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await firebase.assertFails(
+      testRead.set({
+        date: 'date',
+        link: 'link',
+        msg: 'msg',
+        title: 'title',
+      }),
+    );
+  });
+  it('NT -> Create Notification: {+} All Required Fields, {+} Admin Access, {-} Valid Field Types', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await firebase.assertFails(
+      testRead.set({
+        date: 15,
+        link: 'link',
+        msg: 'msg',
+        title: 'title',
+      }),
+    );
+  });
+  it('PT -> Update Notification: {+} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await admin.collection('/notifications').doc(notificationId).set({
+      date: 'date',
+      link: 'link',
+      msg: 'msg',
+      title: 'title',
+    });
+    await firebase.assertSucceeds(testRead.update({ date: 'date_new' }));
+  });
+  it('NT -> Update Notification: {-} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await admin.collection('/notifications').doc(notificationId).set({
+      date: 'date',
+      link: 'link',
+      msg: 'msg',
+      title: 'title',
+    });
+    await firebase.assertFails(
+      testRead.update({ date: 'date_new', uid: 'abc' }),
+    );
+  });
+  it('NT -> Update Notification: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(theirAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await admin.collection('/notifications').doc(notificationId).set({
+      date: 'date',
+      link: 'link',
+      msg: 'msg',
+      title: 'title',
+    });
+    await firebase.assertFails(testRead.update({ date: 'date_new' }));
+  });
+  it('NT -> Update Notification: {+} Only Allowed Fields, {+} Admin access, {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/notificationId').doc(notificationId);
+    await admin.collection('/notificationId').doc(notificationId).set({
+      date: 'date',
+      link: 'link',
+      msg: 'msg',
+      title: 'title',
+    });
+    await firebase.assertFails(testRead.update({ date: 15 }));
+  });
+  it('PT -> Delete Notification: {+} Admin Access', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/notifications').doc(notificationId);
+    await firebase.assertSucceeds(testRead.delete());
+  });
+  it('NT -> Delete Notification: {-} Admin Access, {+} Auth', async () => {
+    await setupAdmin();
+    const notificationId = 'notificationId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/notifications').doc(notificationId);
     await firebase.assertFails(testRead.delete());
   });
 
