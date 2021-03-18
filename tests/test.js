@@ -451,35 +451,46 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await setupAdmin();
     const projectId = 'project_abc';
     const db = getFirestore(theirAuth);
+    const admin = getAdminFirestore();
 
     const testRead = db.collection('/projects').doc(projectId);
-    await firebase.assertFails(
-      testRead.update({
+    await admin
+      .collection('/projects')
+      .doc(projectId)
+      .set({
         date: 'date',
         description: 'description',
+        fileUrl: 'fileUrl',
         link: 'link',
         name: 'name',
         progress: 'progress',
+        projectImg: ['projectImg', 'img'],
         teamMembers: ['teamMembers'],
-      }),
-    );
+      });
+    await firebase.assertFails(testRead.update({ date: 'date_new' }));
   });
   it('NT -> Update Projects: {-} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const projectId = 'project_abc';
     const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
 
     const testRead = db.collection('/projects').doc(projectId);
-    await firebase.assertFails(
-      testRead.update({
+    await admin
+      .collection('/projects')
+      .doc(projectId)
+      .set({
         date: 'date',
         description: 'description',
+        fileUrl: 'fileUrl',
         link: 'link',
         name: 'name',
         progress: 'progress',
+        projectImg: ['projectImg', 'img'],
         teamMembers: ['teamMembers'],
-        uid: 'uid',
-      }),
+      });
+    await firebase.assertFails(
+      testRead.update({ date: 'date_new', uid: 'uid' }),
     );
   });
   it('NT -> Delete Projects: {+} Admin Access', async () => {
