@@ -1581,6 +1581,163 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/news').doc(newsId);
     await firebase.assertFails(testRead.delete());
   });
+
+  // Robocon Tests
+  it('PT -> Read Robocon: {-} Auth', async () => {
+    const roboconId = 'roboconId';
+    const db = getFirestore(null);
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+
+  it('PT -> Create Robocon: {+} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const roboconId = 'roboconId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await firebase.assertSucceeds(
+      testRead.set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      }),
+    );
+  });
+  it('NT -> Create Robocon: {-} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const roboconId = 'roboconId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await firebase.assertFails(
+      testRead.set({
+        about: 'about',
+        image: 'imageUrl',
+        introduction: 'introduction',
+        video: 'videoUrl',
+      }),
+    );
+  });
+  it('NT -> Create Robocon: {+} All Required Fields {-} Admin access {+} Valid Field Type', async () => {
+    const roboconId = 'roboconId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await firebase.assertFails(
+      testRead.set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      }),
+    );
+  });
+  it('NT -> Create Robocon: {+} All Required Fields {+} Admin access {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const roboconId = 'roboconId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await firebase.assertFails(
+      testRead.set({
+        about: 'about',
+        gallery: 'gallery',
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      }),
+    );
+  });
+
+  it('PT -> Update Robocon: {+} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const roboconId = 'roboconId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await admin
+      .collection('/robocon')
+      .doc(roboconId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertSucceeds(testRead.update({ title: 'titleNew' }));
+  });
+  it('NT -> Update Robocon: {-} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const roboconId = 'roboconId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await admin
+      .collection('/robocon')
+      .doc(roboconId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertFails(
+      testRead.update({ title: 'titleNew', uid: 'uidNew' }),
+    );
+  });
+  it('NT -> Update Robocon: {+} Only Allowed Fields, {-} Admin access, {+} Valid Field Type', async () => {
+    const roboconId = 'roboconId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await admin
+      .collection('/robocon')
+      .doc(roboconId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertFails(testRead.update({ image: 'imageUrlNew' }));
+  });
+  it('NT -> Update Robocon: {+} Only Allowed Fields, {+} Admin access, {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const roboconId = 'roboconId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robocon').doc(roboconId);
+    await admin
+      .collection('/robocon')
+      .doc(roboconId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertFails(testRead.update({ image: false }));
+  });
 });
 
 after(async () => {
