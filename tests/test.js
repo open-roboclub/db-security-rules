@@ -1738,6 +1738,163 @@ describe('AMURoboclub app DB Unit Testing', () => {
       });
     await firebase.assertFails(testRead.update({ image: false }));
   });
+
+  // Robovoyage Tests
+  it('PT -> Read Robovoyage: {-} Auth', async () => {
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(null);
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+
+  it('PT -> Create Robovoyage: {+} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await firebase.assertSucceeds(
+      testRead.set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      }),
+    );
+  });
+  it('NT -> Create Robovoyage: {-} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await firebase.assertFails(
+      testRead.set({
+        about: 'about',
+        image: 'imageUrl',
+        introduction: 'introduction',
+        video: 'videoUrl',
+      }),
+    );
+  });
+  it('NT -> Create Robovoyage: {+} All Required Fields {-} Admin access {+} Valid Field Type', async () => {
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await firebase.assertFails(
+      testRead.set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      }),
+    );
+  });
+  it('NT -> Create Robovoyage: {+} All Required Fields {+} Admin access {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await firebase.assertFails(
+      testRead.set({
+        about: 'about',
+        gallery: [true],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      }),
+    );
+  });
+
+  it('PT -> Update Robovoyage: {+} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await admin
+      .collection('/robovoyage')
+      .doc(robovoyageId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertSucceeds(testRead.update({ title: 'titleNew' }));
+  });
+  it('NT -> Update Robovoyage: {-} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await admin
+      .collection('/robovoyage')
+      .doc(robovoyageId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertFails(
+      testRead.update({ title: 'titleNew', uid: 'uidNew' }),
+    );
+  });
+  it('NT -> Update Robovoyage: {+} Only Allowed Fields, {-} Admin access, {+} Valid Field Type', async () => {
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await admin
+      .collection('/robovoyage')
+      .doc(robovoyageId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertFails(testRead.update({ image: 'imageUrlNew' }));
+  });
+  it('NT -> Update Robovoyage: {+} Only Allowed Fields, {+} Admin access, {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const robovoyageId = 'robovoyageId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/robovoyage').doc(robovoyageId);
+    await admin
+      .collection('/robovoyage')
+      .doc(robovoyageId)
+      .set({
+        about: 'about',
+        gallery: ['urlOne', 'urlTwo'],
+        image: 'imageUrl',
+        introduction: 'introduction',
+        title: 'title',
+        video: 'videoUrl',
+      });
+    await firebase.assertFails(testRead.update({ image: true }));
+  });
 });
 
 after(async () => {
