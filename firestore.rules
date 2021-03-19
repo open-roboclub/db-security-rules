@@ -47,7 +47,9 @@ service cloud.firestore {
       docData.link is string &&
       docData.name is string &&
       docData.progress is string &&
+      docData.projectImg is list &&
       docData.projectImg[0] is string &&
+      docData.teamMembers is list &&
       docData.teamMembers[0] is string;
     }
 
@@ -95,6 +97,36 @@ service cloud.firestore {
       docData.name is string &&
       docData.size is string &&
       docData.url is string
+    }
+
+    function newsFieldsTypeValidate(docData) {
+      return docData.date is string &&
+      docData.link is string &&
+      docData.notice is string &&
+      docData.notification is string &&
+      docData.sent is string &&
+      docData.timestamp is number &&
+      docData.title is string;
+    }
+
+    function roboconFieldsTypeValidate(docData) {
+      return docData.about is string &&
+      docData.gallery is list &&
+      docData.gallery[0] is string &&
+      docData.image is string &&
+      docData.introduction is string &&
+      docData.title is string &&
+      docData.video is string;
+    }
+
+    function robovoyageFieldsTypeValidate(docData) {
+      return docData.about is string &&
+      docData.gallery is list &&
+      docData.gallery[0] is string &&
+      docData.image is string &&
+      docData.introduction is string &&
+      docData.title is string &&
+      docData.video is string;
     }
 
     // Collection Access Rules
@@ -164,17 +196,21 @@ service cloud.firestore {
 
     match /news/{newsId} {
       allow read;
-      allow create, update: if isAdmin();
+      allow create: if isAdmin() && documentFieldsCheckOut(["date", "link", "notice", "notification", "sent", "timestamp", "title"], []) && newsFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["date", "link", "notice", "notification", "sent", "timestamp", "title"]) && newsFieldsTypeValidate(request.resource.data);
+      allow delete: if isAdmin();
     }
 
     match /robocon/{roboconId} {
       allow read;
-      allow create, update: if isAdmin();
+      allow create:if isAdmin() && documentFieldsCheckOut(["about", "gallery", "image", "introduction", "title", "video"], []) && roboconFieldsTypeValidate(request.resource.data); 
+      allow update: if isAdmin() && editOnlyChangesField(["about", "gallery", "image", "introduction", "title", "video"]) && roboconFieldsTypeValidate(request.resource.data); 
     }
 
     match /robovoyage/{robovoyageId} {
       allow read;
-      allow create, update: if isAdmin();
+      allow create:if isAdmin() && documentFieldsCheckOut(["about", "gallery", "image", "introduction", "title", "video"], []) && robovoyageFieldsTypeValidate(request.resource.data); 
+      allow update: if isAdmin() && editOnlyChangesField(["about", "gallery", "image", "introduction", "title", "video"]) && robovoyageFieldsTypeValidate(request.resource.data); 
     }
 
     match /members/{membersId} {
