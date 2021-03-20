@@ -9,6 +9,14 @@ jobs:
     name: Deploy Rules
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - name: Wait on tests
+        uses: lewagon/wait-on-check-action@v0.2
+        with:
+          ref: master
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 60 # secs
+          running-workflow-name: "Deploy Rules" # HERE
       - name: Checkout Repo
         uses: actions/checkout@master
       - uses: actions/setup-node@v1
