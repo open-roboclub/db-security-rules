@@ -1641,7 +1641,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('PT -> Create Robocon: {+} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('PT -> Create Robocon: {+} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const roboconId = 'roboconId';
     const db = getFirestore(myAuth);
@@ -1658,7 +1658,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robocon: {-} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robocon: {-} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const roboconId = 'roboconId';
     const db = getFirestore(myAuth);
@@ -1673,7 +1673,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robocon: {+} All Required Fields {-} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robocon: {+} All Required Fields, {-} Admin access, {+} Valid Field Type', async () => {
     const roboconId = 'roboconId';
     const db = getFirestore(theirAuth);
 
@@ -1689,7 +1689,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robocon: {+} All Required Fields {+} Admin access {-} Valid Field Type', async () => {
+  it('NT -> Create Robocon: {+} All Required Fields, {+} Admin access, {-} Valid Field Type', async () => {
     await setupAdmin();
     const roboconId = 'roboconId';
     const db = getFirestore(myAuth);
@@ -1798,7 +1798,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('PT -> Create Robovoyage: {+} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('PT -> Create Robovoyage: {+} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(myAuth);
@@ -1815,7 +1815,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robovoyage: {-} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robovoyage: {-} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(myAuth);
@@ -1830,7 +1830,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robovoyage: {+} All Required Fields {-} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robovoyage: {+} All Required Fields, {-} Admin access, {+} Valid Field Type', async () => {
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(theirAuth);
 
@@ -1846,7 +1846,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robovoyage: {+} All Required Fields {+} Admin access {-} Valid Field Type', async () => {
+  it('NT -> Create Robovoyage: {+} All Required Fields, {+} Admin access, {-} Valid Field Type', async () => {
     await setupAdmin();
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(myAuth);
