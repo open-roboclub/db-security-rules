@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -9,6 +9,8 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      PUSH_CHECK: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -18,3 +20,11 @@ jobs:
         run: npm install
       - name: Run all the tests
         run: npm run emulate-tests
+      - name: Install firebase-cli
+        if: ${{ env.PUSH_CHECK' }}
+        run: npm install -g firebase-tools
+      - name: Deploy to Firebase
+        if: ${{ env.PUSH_CHECK' }}
+        run: firebase deploy --only firestore:rules
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
