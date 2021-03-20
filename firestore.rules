@@ -152,6 +152,10 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    match /keys/{keyId} {
+      allow read: if isAdmin();
+    }
+
     match /projects/{projectsId} {
       allow read;
       allow create: if isAdmin() && documentFieldsCheckOut(["date", "description", "fileUrl", "link", "name", "progress", "projectImg", "teamMembers"], []) && projectFieldsTypeValidate(request.resource.data);
