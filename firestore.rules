@@ -50,7 +50,9 @@ service cloud.firestore {
       docData.projectImg is list &&
       docData.projectImg[0] is string &&
       docData.teamMembers is list &&
-      docData.teamMembers[0] is string;
+      docData.teamMembers[0] is map &&
+      docData.teamMembers[0]['linkedinId'] is string &&
+      docData.teamMembers[0]['member'] is string;
     }
 
     function contributorFieldsTypeValidate(docData) {
@@ -93,10 +95,13 @@ service cloud.firestore {
     }
 
     function downloadFieldsTypeValidate(docData) {
-      return docData.file is string &&
-      docData.name is string &&
-      docData.size is string &&
-      docData.url is string
+      return docData.items is list &&
+      docData.items[0] is map &&
+      docData.items[0]['file'] is string &&
+      docData.items[0]['name'] is string &&
+      docData.items[0]['size'] is string &&
+      docData.items[0]['url'] is string &&
+      docData.name is string;
     }
 
     function newsFieldsTypeValidate(docData) {
@@ -152,6 +157,10 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    match /keys/{keyId} {
+      allow read: if isAdmin();
+    }
+
     match /projects/{projectsId} {
       allow read;
       allow create: if isAdmin() && documentFieldsCheckOut(["date", "description", "fileUrl", "link", "name", "progress", "projectImg", "teamMembers"], []) && projectFieldsTypeValidate(request.resource.data);
@@ -190,8 +199,8 @@ service cloud.firestore {
 
     match /downloads/{downloadsId} {
       allow read;
-    	allow create: if isAdmin() && documentFieldsCheckOut(["file", "name", "size", "url"], []) && downloadFieldsTypeValidate(request.resource.data);
-      allow update: if isAdmin() && editOnlyChangesField(["file", "name", "size", "url"]) && downloadFieldsTypeValidate(request.resource.data);
+    	allow create: if isAdmin() && documentFieldsCheckOut(["items", "name"], []) && downloadFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["items", "name"]) && downloadFieldsTypeValidate(request.resource.data);
     }
 
     match /news/{newsId} {

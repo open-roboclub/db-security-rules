@@ -340,7 +340,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         name: 'name',
         progress: 'progress',
         projectImg: ['projectImg', 'img'],
-        teamMembers: ['teamMembers'],
+        teamMembers: [{ linkedinId: 'myid', member: 'member' }],
       }),
     );
   });
@@ -386,7 +386,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         name: 'name',
         progress: 'progress',
         projectImg: ['projectImg', 'img'],
-        teamMembers: ['teamMembers'],
+        teamMembers: [{ linkedinId: 'myid', member: 'member' }],
       }),
     );
   });
@@ -403,7 +403,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         link: 'link',
         name: 'name',
         progress: 'progress',
-        teamMembers: ['teamMembers'],
+        teamMembers: [{ linkedinId: 'myid', member: 'member' }],
       }),
     );
   });
@@ -425,9 +425,9 @@ describe('AMURoboclub app DB Unit Testing', () => {
         name: 'name',
         progress: 'progress',
         projectImg: ['projectImg', 'img'],
-        teamMembers: ['teamMembers'],
+        teamMembers: [{ linkedinId: 'myid', member: 'member' }],
       });
-    await firebase.assertSucceeds(testRead.update({ date: 'date_new' }));
+    await firebase.assertSucceeds(testRead.update({ progress: '0' }));
   });
   it('NT -> Update Projects: {+} Only Allowed Fields, {+} Admin access, {-} Valid Field Type', async () => {
     await setupAdmin();
@@ -436,18 +436,21 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/projects').doc(projectId);
-    await admin.collection('/projects').doc(projectId).set({
-      date: 'date',
-      description: 'description',
-      fileUrl: 'fileUrl',
-      link: 'link',
-      name: 'name',
-      progress: 'progress',
-      teamMembers: 'teamMembers',
-    });
+    await admin
+      .collection('/projects')
+      .doc(projectId)
+      .set({
+        date: 'date',
+        description: 'description',
+        fileUrl: 'fileUrl',
+        link: 'link',
+        name: 'name',
+        progress: 'progress',
+        teamMembers: [{ linkedinId: 'myid', member: 'member' }],
+      });
     await firebase.assertFails(testRead.update({ date: true }));
   });
-  it('NT -> Update Projects: {+} Only Allowed Fields, {-} Admin access, {+} Valid Field Type', async () => {
+  it('NT -> Update Projects: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
     await setupAdmin();
     const projectId = 'project_abc';
     const db = getFirestore(theirAuth);
@@ -465,7 +468,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         name: 'name',
         progress: 'progress',
         projectImg: ['projectImg', 'img'],
-        teamMembers: ['teamMembers'],
+        teamMembers: [{ linkedinId: 'myid', member: 'member' }],
       });
     await firebase.assertFails(testRead.update({ date: 'date_new' }));
   });
@@ -487,7 +490,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         name: 'name',
         progress: 'progress',
         projectImg: ['projectImg', 'img'],
-        teamMembers: ['teamMembers'],
+        teamMembers: [{ linkedinId: 'myid', member: 'member' }],
       });
     await firebase.assertFails(
       testRead.update({ date: 'date_new', uid: 'uid' }),
@@ -1040,7 +1043,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/feedbacks').doc(feedbackId);
     await firebase.assertSucceeds(testRead.get());
   });
-  it('PT -> Create Feedbacks: {+} All Required Fields, {-} Auth, {+} Only Allowed Fields {+} Valid Field Types', async () => {
+  it('PT -> Create Feedbacks: {+} All Required Fields, {-} Auth, {+} Only Allowed Fields, {+} Valid Field Types', async () => {
     await setupAdmin();
     const feedbackId = 'feedback_abc';
     const db = getFirestore(null);
@@ -1068,7 +1071,6 @@ describe('AMURoboclub app DB Unit Testing', () => {
     );
   });
   it('NT -> Create Feedbacks: {+} All Required Fields, {+} Only Allowed Fields {-} Valid Field Types', async () => {
-    await setupAdmin();
     const feedbackId = 'feedback_abc';
     const db = getFirestore(null);
 
@@ -1082,7 +1084,6 @@ describe('AMURoboclub app DB Unit Testing', () => {
     );
   });
   it('NT -> Create Feedbacks: {+} All Required Fields, {-} Only Allowed Fields {+} Valid Field Types', async () => {
-    await setupAdmin();
     const feedbackId = 'feedback_abc';
     const db = getFirestore(null);
 
@@ -1105,6 +1106,56 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertFails(testRead.delete());
   });
 
+  // Keys Collection Tests
+  it('PT -> Read Keys: {+} Admin', async () => {
+    await setupAdmin();
+    const keyId = 'keyId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/keys').doc(keyId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+  it('NT -> Read Keys: {-} Admin, {+} Auth', async () => {
+    await setupAdmin();
+    const keyId = 'keyId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/keys').doc(keyId);
+    await firebase.assertFails(testRead.get());
+  });
+  it('NT -> Create Keys: {+} Admin Access', async () => {
+    await setupAdmin();
+    const keyId = 'keyId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/keys').doc(keyId);
+    await firebase.assertFails(
+      testRead.set({
+        key: 'new_key',
+      }),
+    );
+  });
+  it('NT -> Update Keys: {+} Admin access', async () => {
+    await setupAdmin();
+    const keyId = 'keyId';
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+
+    const testRead = db.collection('/keys').doc(keyId);
+    await admin.collection('/keys').doc(keyId).set({
+      key: 'old_key',
+    });
+    await firebase.assertFails(testRead.update({ key: 'new_key' }));
+  });
+  it('NT -> Delete Keys: {+} Admin Access', async () => {
+    await setupAdmin();
+    const keyId = 'keyId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/keys').doc(keyId);
+    await firebase.assertFails(testRead.delete());
+  });
+
   // Downloads page tests
   it('PT -> Read Downloads: {-} Auth', async () => {
     const downloadsId = 'downloadsId';
@@ -1113,7 +1164,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/downloads').doc(downloadsId);
     await firebase.assertSucceeds(testRead.get());
   });
-  it('PT -> Create Downloads: {+} Admin Access {+} Only Allowed Fields {+} Valid Field Type', async () => {
+  it('PT -> Create Downloads: {+} Admin Access, {+} Only Allowed Fields, {+} Valid Field Type', async () => {
     await setupAdmin();
     const downloadsId = 'downloadsId';
     const db = getFirestore(myAuth);
@@ -1121,14 +1172,19 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/downloads').doc(downloadsId);
     await firebase.assertSucceeds(
       testRead.set({
-        file: 'file',
-        name: 'name',
-        size: 'size',
-        url: 'url',
+        name: 'any_name',
+        items: [
+          {
+            file: 'file',
+            name: 'name',
+            size: 'size',
+            url: 'url',
+          },
+        ],
       }),
     );
   });
-  it('NT -> Create Downloads: {+} Admin Access {+} Only Allowed Fields {-} Valid Field Type', async () => {
+  it('NT -> Create Downloads: {+} Admin Access, {+} Only Allowed Fields, {-} Valid Field Type', async () => {
     await setupAdmin();
     const downloadsId = 'downloadsId';
     const db = getFirestore(myAuth);
@@ -1136,14 +1192,19 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/downloads').doc(downloadsId);
     await firebase.assertFails(
       testRead.set({
-        file: 1,
-        name: 'name',
-        size: 'size',
-        url: 'url',
+        name: 'any_name',
+        items: [
+          {
+            file: 'file',
+            name: 'name',
+            size: 53,
+            url: 'url',
+          },
+        ],
       }),
     );
   });
-  it('NT -> Create Downloads: {+} Admin access {-} Only Allowed Fields', async () => {
+  it('NT -> Create Downloads: {+} Admin access, {-} Only Allowed Fields', async () => {
     await setupAdmin();
     const downloadsId = 'downloadsId';
     const db = getFirestore(myAuth);
@@ -1151,46 +1212,66 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/downloads').doc(downloadsId);
     await firebase.assertFails(
       testRead.set({
-        file: 'file',
-        name: 'name',
-        size: 'size',
-        url: 'url',
-        date: 'date',
+        name: 'any_name',
+        new_field: 'onemore',
+        items: [
+          {
+            file: 'file',
+            name: 'name',
+            size: 'size',
+            url: 'url',
+          },
+        ],
       }),
     );
   });
-  it('NT -> Create Downloads: {-} Admin access {+} Only Allowed Fields {+} Auth {+} Valid Field Type ', async () => {
+  it('NT -> Create Downloads: {-} Admin access, {+} Only Allowed Fields, {+} Auth, {+} Valid Field Type ', async () => {
+    await setupAdmin();
     const downloadsId = 'downloadsId';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(theirAuth);
 
     const testRead = db.collection('/downloads').doc(downloadsId);
     await firebase.assertFails(
       testRead.set({
-        file: 'file',
-        name: 'name',
-        size: 'size',
-        url: 'url',
+        name: 'any_name',
+        items: [
+          {
+            file: 'file',
+            name: 'name',
+            size: 'size',
+            url: 'url',
+          },
+        ],
       }),
     );
   });
-  it('PT -> Update Downlods: {+} Only Allowed Fields, {+} Admin access {+} Valid Field Type', async () => {
+  it('PT -> Update Downlods: {+} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const downloadsId = 'downloadsId';
     const db = getFirestore(myAuth);
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/downloads').doc(downloadsId);
-    await admin.collection('/downloads').doc(downloadsId).set({
-      file: 'file',
-      name: 'name',
-      size: 'size',
-      url: 'url',
-    });
-    await firebase.assertSucceeds(testRead.update({ file: 'file_new' }));
+    await admin
+      .collection('/downloads')
+      .doc(downloadsId)
+      .set({
+        name: 'any_name',
+        items: [
+          {
+            file: 'file',
+            name: 'name',
+            size: 'size',
+            url: 'url',
+          },
+        ],
+      });
+    await firebase.assertSucceeds(testRead.update({ name: 'new_name' }));
   });
-  it('NT -> Update Downloads: {+} Only Allowed Fields, {-} Admin access {+} Auth {+} Valid Field Type', async () => {
+  it('NT -> Update Downloads: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
     const downloadsId = 'downloadsId';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(theirAuth);
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/downloads').doc(downloadsId);
@@ -1209,28 +1290,44 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/downloads').doc(downloadsId);
-    await admin.collection('/downloads').doc(downloadsId).set({
-      file: 'file',
-      name: 'name',
-      size: 'size',
-      url: 'url',
-    });
+    await admin
+      .collection('/downloads')
+      .doc(downloadsId)
+      .set({
+        name: 'any_name',
+        items: [
+          {
+            file: 'file',
+            name: 'name',
+            size: 'size',
+            url: 'url',
+          },
+        ],
+      });
     await firebase.assertFails(testRead.update({ date: 'date' }));
   });
-  it('NT -> Update Downloads: {+} Only Allowed Fields, {+} Admin access {-} Valid Field Type', async () => {
+  it('NT -> Update Downloads: {+} Only Allowed Fields, {+} Admin access, {-} Valid Field Type', async () => {
     await setupAdmin();
     const downloadsId = 'downloadsId';
     const db = getFirestore(myAuth);
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/downloads').doc(downloadsId);
-    await admin.collection('/downloads').doc(downloadsId).set({
-      file: 'file',
-      name: 'name',
-      size: 'size',
-      url: 'url',
-    });
-    await firebase.assertFails(testRead.update({ file: 2 }));
+    await admin
+      .collection('/downloads')
+      .doc(downloadsId)
+      .set({
+        name: 'any_name',
+        items: [
+          {
+            file: 'file',
+            name: 'name',
+            size: 'size',
+            url: 'url',
+          },
+        ],
+      });
+    await firebase.assertFails(testRead.update({ name: 2 }));
   });
 
   // Current team tests
@@ -1241,7 +1338,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/currentTeam').doc(singleId);
     await firebase.assertSucceeds(testRead.get());
   });
-  it('NT -> Create current team: {+} Admin access {+} Only Allowed Fields', async () => {
+  it('NT -> Create current team: {+} Admin access, {+} Only Allowed Fields', async () => {
     await setupAdmin();
     const singleId = 'single_Id';
     const db = getFirestore(myAuth);
@@ -1259,9 +1356,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('NT -> Read pushTokens: {-} Admin access {+} Auth', async () => {
+  it('NT -> Read pushTokens: {-} Admin access, {+} Auth', async () => {
+    await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(theirAuth);
     const testRead = db.collection('/pushTokens').doc(pushTokensId);
     await firebase.assertFails(testRead.get());
   });
@@ -1392,7 +1490,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('PT -> Create News: {+} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('PT -> Create News: {+} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const newsId = 'newsId';
     const db = getFirestore(myAuth);
@@ -1410,7 +1508,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create News: {-} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create News: {-} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const newsId = 'newsId';
     const db = getFirestore(myAuth);
@@ -1426,9 +1524,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create News: {+} All Required Fields {-} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create News: {+} All Required Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
     const newsId = 'newsId';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(theirAuth);
 
     const testRead = db.collection('/news').doc(newsId);
     await firebase.assertFails(
@@ -1443,7 +1542,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create News: {+} All Required Fields {+} Admin access {-} Valid Field Type', async () => {
+  it('NT -> Create News: {+} All Required Fields, {+} Admin access, {-} Valid Field Type', async () => {
     await setupAdmin();
     const newsId = 'newsId';
     const db = getFirestore(myAuth);
@@ -1500,9 +1599,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       testRead.update({ date: 'dateNew', uid: 'uidNew' }),
     );
   });
-  it('NT -> Update News: {+} Only Allowed Fields, {-} Admin access, {+} Valid Field Type', async () => {
+  it('NT -> Update News: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
     const newsId = 'newsId';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(theirAuth);
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/news').doc(newsId);
@@ -1561,7 +1661,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('PT -> Create Robocon: {+} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('PT -> Create Robocon: {+} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const roboconId = 'roboconId';
     const db = getFirestore(myAuth);
@@ -1578,7 +1678,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robocon: {-} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robocon: {-} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const roboconId = 'roboconId';
     const db = getFirestore(myAuth);
@@ -1593,7 +1693,8 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robocon: {+} All Required Fields {-} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robocon: {+} All Required Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
     const roboconId = 'roboconId';
     const db = getFirestore(theirAuth);
 
@@ -1609,7 +1710,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robocon: {+} All Required Fields {+} Admin access {-} Valid Field Type', async () => {
+  it('NT -> Create Robocon: {+} All Required Fields, {+} Admin access, {-} Valid Field Type', async () => {
     await setupAdmin();
     const roboconId = 'roboconId';
     const db = getFirestore(myAuth);
@@ -1669,9 +1770,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       testRead.update({ title: 'titleNew', uid: 'uidNew' }),
     );
   });
-  it('NT -> Update Robocon: {+} Only Allowed Fields, {-} Admin access, {+} Valid Field Type', async () => {
+  it('NT -> Update Robocon: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
     const roboconId = 'roboconId';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(theirAuth);
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/robocon').doc(roboconId);
@@ -1718,7 +1820,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
     await firebase.assertSucceeds(testRead.get());
   });
 
-  it('PT -> Create Robovoyage: {+} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('PT -> Create Robovoyage: {+} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(myAuth);
@@ -1735,7 +1837,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robovoyage: {-} All Required Fields {+} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robovoyage: {-} All Required Fields, {+} Admin access, {+} Valid Field Type', async () => {
     await setupAdmin();
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(myAuth);
@@ -1750,7 +1852,8 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robovoyage: {+} All Required Fields {-} Admin access {+} Valid Field Type', async () => {
+  it('NT -> Create Robovoyage: {+} All Required Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(theirAuth);
 
@@ -1766,7 +1869,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create Robovoyage: {+} All Required Fields {+} Admin access {-} Valid Field Type', async () => {
+  it('NT -> Create Robovoyage: {+} All Required Fields, {+} Admin access, {-} Valid Field Type', async () => {
     await setupAdmin();
     const robovoyageId = 'robovoyageId';
     const db = getFirestore(myAuth);
@@ -1826,9 +1929,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       testRead.update({ title: 'titleNew', uid: 'uidNew' }),
     );
   });
-  it('NT -> Update Robovoyage: {+} Only Allowed Fields, {-} Admin access, {+} Valid Field Type', async () => {
+  it('NT -> Update Robovoyage: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
     const robovoyageId = 'robovoyageId';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(theirAuth);
     const admin = getAdminFirestore();
 
     const testRead = db.collection('/robovoyage').doc(robovoyageId);
