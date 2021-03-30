@@ -160,8 +160,8 @@ service cloud.firestore {
 
     match /pushTokens/{pushTokensId} {
       allow read: if isAdmin();
-      allow create: if isAdmin() && documentFieldsCheckOut(["androidId", "createdAt", "deviceToken", "platform"], []) && pushTokenFieldsTypeValidate(request.resource.data);
-      allow update: if isAdmin() && editOnlyChangesField(["androidId", "createdAt", "deviceToken", "platform"]) && request.resource.data.androidId == resource.data.androidId && pushTokenFieldsTypeValidate(request.resource.data);
+      allow create: if documentFieldsCheckOut(["androidId", "createdAt", "deviceToken", "platform"], []) && pushTokenFieldsTypeValidate(request.resource.data);
+      allow update: if editOnlyChangesField(["androidId", "createdAt", "deviceToken", "platform"]) && request.resource.data.androidId == resource.data.androidId && pushTokenFieldsTypeValidate(request.resource.data);
     }
 
     match /teams/{teamsId} {

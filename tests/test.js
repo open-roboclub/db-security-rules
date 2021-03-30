@@ -1265,10 +1265,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
     const testRead = db.collection('/pushTokens').doc(pushTokensId);
     await firebase.assertFails(testRead.get());
   });
-  it('PT -> Create pushTokens: {+} Admin access {+} Only Allowed Fields {+} Valid Field Type', async () => {
+  it('PT -> Create pushTokens: {-} Admin access, {-} Auth, {+} Only Allowed Fields {+} Valid Field Type', async () => {
     await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(null);
 
     const testRead = db.collection('/pushTokens').doc(pushTokensId);
     const currentTimeStamp = new Date();
@@ -1281,25 +1281,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create pushTokens: {-} Admin access {+} Only Allowed Fields {+} Valid Field Type', async () => {
-    const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
-
-    const currentTimeStamp = new Date();
-    const testRead = db.collection('/pushTokens').doc(pushTokensId);
-    await firebase.assertFails(
-      testRead.set({
-        androidId: 'id',
-        createdAt: currentTimeStamp,
-        deviceToken: 'token',
-        platform: 'android',
-      }),
-    );
-  });
-  it('NT -> Create pushTokens: {+} Admin access {-} Only Allowed Fields {+} Valid Field Type', async () => {
+  it('NT -> Create pushTokens: {-} Admin access, {-} Auth, {-} Only Allowed Fields {+} Valid Field Type', async () => {
     await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(null);
 
     const currentTimeStamp = new Date();
     const testRead = db.collection('/pushTokens').doc(pushTokensId);
@@ -1313,10 +1298,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('NT -> Create pushTokens: {+} Admin access {+} Only Allowed Fields {-} Valid Field Type', async () => {
+  it('NT -> Create pushTokens: {-} Admin access, {-} Auth, {+} Only Allowed Fields {-} Valid Field Type', async () => {
     await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(null);
 
     const currentTimeStamp = new Date();
     const testRead = db.collection('/pushTokens').doc(pushTokensId);
@@ -1329,10 +1314,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       }),
     );
   });
-  it('PT -> Update pushTokens: {+} Admin access {+} Request Id == Resource Id {+} Valid Field Type {+} Only Allowed Fields', async () => {
+  it('PT -> Update pushTokens: {-} Admin access, {-} Auth, {+} Request Id == Resource Id {+} Valid Field Type {+} Only Allowed Fields', async () => {
     await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(null);
     const admin = getAdminFirestore();
 
     const currentTimeStamp = new Date();
@@ -1347,10 +1332,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       testRead.update({ deviceToken: 'token_new' }),
     );
   });
-  it('NT -> Update pushTokens: {+} Admin access {-} Resource ID == Request ID {+} Only Allowed Fields {+} Valid Field Type', async () => {
+  it('NT -> Update pushTokens: {-} Admin access, {-} Auth, {-} Resource ID == Request ID {+} Only Allowed Fields {+} Valid Field Type', async () => {
     await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(null);
     const admin = getAdminFirestore();
 
     const currentTimeStamp = new Date();
@@ -1365,25 +1350,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
       testRead.update({ androidId: 'id_new', createdAt: currentTimeStamp }),
     );
   });
-  it('NT -> Update pushTokens: {-} Admin access {+} Resource ID == Request ID {+} Valid Field Type {+} Only Allowed Fields', async () => {
-    const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
-    const admin = getAdminFirestore();
-
-    const currentTimeStamp = new Date();
-    const testRead = db.collection('/pushTokens').doc(pushTokensId);
-    await admin.collection('/pushTokens').doc(pushTokensId).set({
-      androidId: 'id',
-      createdAt: currentTimeStamp,
-      deviceToken: 'token',
-      platform: 'android',
-    });
-    await firebase.assertFails(testRead.update({ deviceToken: 'token_new' }));
-  });
-  it('NT -> Update pushTokens: {+} Admin access {+} Resource ID == Request ID {-} Valid Field Type {+} Only Allowed Fields', async () => {
+  it('NT -> Update pushTokens: {-} Admin access, {-} Auth, {+} Resource ID == Request ID {-} Valid Field Type {+} Only Allowed Fields', async () => {
     await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(null);
     const admin = getAdminFirestore();
 
     const currentTimeStamp = new Date();
@@ -1396,10 +1366,10 @@ describe('AMURoboclub app DB Unit Testing', () => {
     });
     await firebase.assertFails(testRead.update({ deviceToken: 0 }));
   });
-  it('NT -> Update pushTokens: {+} Admin access {+} Resource ID == Request ID {+} Valid Field Type {-} Only Allowed Fields', async () => {
+  it('NT -> Update pushTokens: {-} Admin access, {-} Auth, {+} Resource ID == Request ID {+} Valid Field Type {-} Only Allowed Fields', async () => {
     await setupAdmin();
     const pushTokensId = 'pushTokens_Id';
-    const db = getFirestore(myAuth);
+    const db = getFirestore(null);
     const admin = getAdminFirestore();
 
     const currentTimeStamp = new Date();
