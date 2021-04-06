@@ -1969,6 +1969,276 @@ describe('AMURoboclub app DB Unit Testing', () => {
       });
     await firebase.assertFails(testRead.update({ image: true }));
   });
+
+  // New Members Registration Tests
+  it('PT -> Read Members: {+} Auth, {+} Admin access', async () => {
+    await setupAdmin();
+    const memberId = 'memberId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+
+  it('NT -> Read Members: {-} Auth', async () => {
+    const memberId = 'memberId';
+    const db = getFirestore(null);
+
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(testRead.get());
+  });
+
+  it('NT -> Read Members: {+} Auth, {-} Admin access', async () => {
+    const memberId = 'memberId';
+    const db = getFirestore(theirAuth);
+
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(testRead.get());
+  });
+
+  it('PT -> Create Member: {+} All Required Fields, {-} Admin access, {-} Auth, {+} Valid Field Type', async () => {
+    const db = getFirestore(null);
+    const memberId = 'memberId';
+
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertSucceeds(
+      testRead.set({
+        timestamp: 32123421,
+        course: 'course',
+        email: 'email',
+        paymentStatus: true,
+        facultyNumber: 'facultyNumber',
+        enrollmentNumber: 'enrollmentNumber',
+        mobile: 'mobile',
+        name: 'name',
+        registrationNumber: 'registrationNumber',
+      }),
+    );
+  });
+  it('NT -> Create Member: {-} All Required Fields, {-} Admin access, {-} Auth, {+} Valid Field Type', async () => {
+    const db = getFirestore(null);
+    const memberId = 'memberId';
+
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(
+      testRead.set({
+        some_other_field: 'some_other_field',
+        timestamp: 32123421,
+        course: 'course',
+        email: 'email',
+        paymentStatus: true,
+        facultyNumber: 'facultyNumber',
+        enrollmentNumber: 'enrollmentNumber',
+        mobile: 'mobile',
+        name: 'name',
+        registrationNumber: 'registrationNumber',
+      }),
+    );
+  });
+  it('NT -> Create Member: {+} All Required Fields, {-} Admin access, {-} Auth, {-} Valid Field Type', async () => {
+    const db = getFirestore(null);
+    const memberId = 'memberId';
+
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(
+      testRead.set({
+        timestamp: 32123421,
+        course: 'course',
+        email: 1234,
+        paymentStatus: true,
+        facultyNumber: 'facultyNumber',
+        enrollmentNumber: 'enrollmentNumber',
+        mobile: 'mobile',
+        name: 'name',
+        registrationNumber: 'registrationNumber',
+      }),
+    );
+  });
+
+  it('PT -> Update Member: {+} Only Allowed Fields, {+} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertSucceeds(
+      testRead.update({
+        facultyNumber: 'newFacultyNumber',
+        enrollmentNumber: 'newenrollmentNumber',
+      }),
+    );
+  });
+  it('NT -> Update Member: {+} Only Allowed Fields, {-} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    const db = getFirestore(theirAuth);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(
+      testRead.update({
+        facultyNumber: 'newFacultyNumber',
+        enrollmentNumber: 'newenrollmentNumber',
+      }),
+    );
+  });
+  it('NT -> Update Member: {+} Only Allowed Fields, {+} Admin access, {+} Auth, {-} Valid Field Type', async () => {
+    await setupAdmin();
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(
+      testRead.update({
+        facultyNumber: 1234,
+        enrollmentNumber: 5467,
+      }),
+    );
+  });
+  it('NT -> Update Member: {-} Only Allowed Fields, {+} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(
+      testRead.update({
+        facultyNumber: 'newFacultyNumber',
+        enrollmentNumber: 'newenrollmentNumber',
+        someOtherField: 2139847,
+      }),
+    );
+  });
+  it('NT -> Update Member: {-} Only Allowed Fields, {+} Admin access, {+} Auth, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(
+      testRead.update({
+        facultyNumber: 'newFacultyNumber',
+        enrollmentNumber: 'newenrollmentNumber',
+        someOtherField: 2139847,
+      }),
+    );
+  });
+  it('PT -> Delete Member: {+} Admin access, {+} Auth', async () => {
+    await setupAdmin();
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertSucceeds(testRead.delete());
+  });
+  it('NT -> Delete Member: {-} Admin access, {+} Auth', async () => {
+    const db = getFirestore(theirAuth);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(testRead.delete());
+  });
+  it('NT -> Delete Member: {-} Auth', async () => {
+    const db = getFirestore(null);
+    const admin = getAdminFirestore();
+    const memberId = 'memberId';
+
+    await admin.collection('members').doc(memberId).set({
+      timestamp: 32123421,
+      course: 'course',
+      email: 'email',
+      paymentStatus: true,
+      facultyNumber: 'facultyNumber',
+      enrollmentNumber: 'enrollmentNumber',
+      mobile: 'mobile',
+      name: 'name',
+      registrationNumber: 'registrationNumber',
+    });
+    const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(testRead.delete());
+  });
 });
 
 after(async () => {
