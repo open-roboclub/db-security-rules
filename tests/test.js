@@ -821,6 +821,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         posterURL: 'posterURL',
         regFormLink: 'regFormLink',
         startTime: 'startTime',
+        isFeatured: true,
       }),
     );
   });
@@ -839,6 +840,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         posterURL: 'posterURL',
         regFormLink: 'regFormLink',
         startTime: 'startTime',
+        isFeatured: true,
       }),
     );
   });
@@ -858,6 +860,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         posterURL: 'posterURL',
         regFormLink: 'regFormLink',
         startTime: 'startTime',
+        isFeatured: true,
       }),
     );
   });
@@ -877,6 +880,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
         posterURL: 'posterURL',
         regFormLink: true,
         startTime: 'startTime',
+        isFeatured: true,
       }),
     );
   });
@@ -896,6 +900,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       posterURL: 'posterURL',
       regFormLink: 'regFormLink',
       startTime: 'startTime',
+      isFeatured: true,
     });
     await firebase.assertSucceeds(testRead.update({ place: 'new_place' }));
   });
@@ -915,6 +920,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       posterURL: 'posterURL',
       regFormLink: 'regFormLink',
       startTime: 'startTime',
+      isFeatured: true,
     });
     await firebase.assertFails(
       testRead.update({ place: 'new_place', uid: 'abc' }),
@@ -936,6 +942,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       posterURL: 'posterURL',
       regFormLink: 'regFormLink',
       startTime: 'startTime',
+      isFeatured: true,
     });
     await firebase.assertFails(testRead.update({ place: 'new_place' }));
   });
@@ -955,6 +962,7 @@ describe('AMURoboclub app DB Unit Testing', () => {
       posterURL: 'posterURL',
       regFormLink: 'regFormLink',
       startTime: 'startTime',
+      isFeatured: true,
     });
     await firebase.assertFails(testRead.update({ date: 15 }));
   });
