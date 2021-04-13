@@ -91,6 +91,7 @@ service cloud.firestore {
       docData.place is string &&
       docData.posterURL is string &&
       docData.regFormLink is string &&
+      docData.isFeatured is bool &&
       docData.startTime is string;
     }
 
@@ -192,8 +193,8 @@ service cloud.firestore {
 
     match /events/{eventsId} {
       allow read;
-      allow create: if isAdmin() && documentFieldsCheckOut(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime"], []) && eventFieldsTypeValidate(request.resource.data);
-      allow update: if isAdmin() && editOnlyChangesField(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime"]) && eventFieldsTypeValidate(request.resource.data);
+      allow create: if isAdmin() && documentFieldsCheckOut(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime", "isFeatured"], []) && eventFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime", "isFeatured"]) && eventFieldsTypeValidate(request.resource.data);
       allow delete: if isAdmin();
     }
 
@@ -223,7 +224,8 @@ service cloud.firestore {
     }
 
     match /members/{membersId} {
-      allow read, create, update: if isAdmin();
+      allow read, update, delete: if isAdmin();
+      allow create;
     }
 
     match /facultyNumbers/{facultyNumbersId} {
