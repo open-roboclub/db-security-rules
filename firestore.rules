@@ -109,7 +109,6 @@ service cloud.firestore {
       docData.link is string &&
       docData.notice is string &&
       docData.notification is string &&
-      docData.sent is string &&
       docData.timestamp is number &&
       docData.title is string;
     }
@@ -241,7 +240,7 @@ service cloud.firestore {
     }
 
     match /facultyNumbers/{facultyNumbersId} {
-      allow read, write;
+      allow read, create;
       allow delete, update: if isAdmin();
     }
 

@@ -1502,6 +1502,23 @@ describe('AMURoboclub app DB Unit Testing', () => {
         link: 'link',
         notice: 'notice',
         notification: 'yes',
+        timestamp: -100,
+        title: 'title',
+      }),
+    );
+  });
+  it('PT -> Create News: {+} Only Allowed Fields, {+} Admin access, {+} Valid Field Type', async () => {
+    await setupAdmin();
+    const newsId = 'newsId';
+    const db = getFirestore(myAuth);
+
+    const testRead = db.collection('/news').doc(newsId);
+    await firebase.assertSucceeds(
+      testRead.set({
+        date: 'date',
+        link: 'link',
+        notice: 'notice',
+        notification: 'yes',
         sent: 'sent',
         timestamp: -100,
         title: 'title',
@@ -2237,6 +2254,67 @@ describe('AMURoboclub app DB Unit Testing', () => {
       registrationNumber: 'registrationNumber',
     });
     const testRead = db.collection('/members').doc(memberId);
+    await firebase.assertFails(testRead.delete());
+  });
+
+  // Faculty Number Tests
+  it('PT -> Create New Faculty Number: {-} Auth', async () => {
+    const db = getFirestore(null);
+    const facultyNumbersId = 'facultyNumbersId';
+
+    const testRead = db.collection('/facultyNumbers').doc(facultyNumbersId);
+    await firebase.assertSucceeds(
+      testRead.set({
+        value: true,
+      }),
+    );
+  });
+
+  it('PT -> Read New Faculty Number: {-} Auth', async () => {
+    const db = getFirestore(null);
+    const facultyNumbersId = 'facultyNumbersId';
+
+    const testRead = db.collection('/facultyNumbers').doc(facultyNumbersId);
+    await firebase.assertSucceeds(testRead.get());
+  });
+
+  it('PT -> Delete New Faculty Number: {+} Admin access, {+} Auth', async () => {
+    await setupAdmin();
+    const db = getFirestore(myAuth);
+    const admin = getAdminFirestore();
+    const facultyNumbersId = 'facultyNumbersId';
+
+    await admin.collection('/facultyNumbers').doc(facultyNumbersId).set({
+      value: true,
+    });
+
+    const testRead = db.collection('/facultyNumbers').doc(facultyNumbersId);
+    await firebase.assertSucceeds(testRead.delete());
+  });
+
+  it('NT -> Delete New Faculty Number: {-} Admin access, {+} Auth', async () => {
+    const db = getFirestore(theirAuth);
+    const admin = getAdminFirestore();
+    const facultyNumbersId = 'facultyNumbersId';
+
+    await admin.collection('/facultyNumbers').doc(facultyNumbersId).set({
+      value: true,
+    });
+
+    const testRead = db.collection('/facultyNumbers').doc(facultyNumbersId);
+    await firebase.assertFails(testRead.delete());
+  });
+
+  it('NT -> Delete New Faculty Number: {-} Auth', async () => {
+    const db = getFirestore(null);
+    const admin = getAdminFirestore();
+    const facultyNumbersId = 'facultyNumbersId';
+
+    await admin.collection('/facultyNumbers').doc(facultyNumbersId).set({
+      value: true,
+    });
+
+    const testRead = db.collection('/facultyNumbers').doc(facultyNumbersId);
     await firebase.assertFails(testRead.delete());
   });
 });
