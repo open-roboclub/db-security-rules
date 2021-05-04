@@ -15,8 +15,7 @@ service cloud.firestore {
       let allFields = requiredFields.concat(optionalFields);
       return request.resource.data.keys().hasAll(requiredFields) && request.resource.data.keys().hasOnly(allFields);
     }
-
-    const admin = getAdminFirestore();
+    
     function editOnlyChangesField(allowedFields) {
       let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
       return affectedKeys.hasOnly(allowedFields);
