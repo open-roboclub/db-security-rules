@@ -16,6 +16,7 @@ service cloud.firestore {
       return request.resource.data.keys().hasAll(requiredFields) && request.resource.data.keys().hasOnly(allFields);
     }
 
+    const admin = getAdminFirestore();
     function editOnlyChangesField(allowedFields) {
       let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
       return affectedKeys.hasOnly(allowedFields);
@@ -91,6 +92,7 @@ service cloud.firestore {
       docData.place is string &&
       docData.posterURL is string &&
       docData.regFormLink is string &&
+      docData.isFeatured is bool &&
       docData.startTime is string;
     }
 
@@ -203,8 +205,8 @@ service cloud.firestore {
 
     match /events/{eventsId} {
       allow read;
-      allow create: if isAdmin() && documentFieldsCheckOut(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime"], []) && eventFieldsTypeValidate(request.resource.data);
-      allow update: if isAdmin() && editOnlyChangesField(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime"]) && eventFieldsTypeValidate(request.resource.data);
+      allow create: if isAdmin() && documentFieldsCheckOut(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime", "isFeatured"], []) && eventFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(["date", "details", "endTime", "eventName", "place", "posterURL", "regFormLink", "startTime", "isFeatured"]) && eventFieldsTypeValidate(request.resource.data);
       allow delete: if isAdmin();
     }
 
