@@ -15,7 +15,7 @@ service cloud.firestore {
       let allFields = requiredFields.concat(optionalFields);
       return request.resource.data.keys().hasAll(requiredFields) && request.resource.data.keys().hasOnly(allFields);
     }
-
+    
     function editOnlyChangesField(allowedFields) {
       let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
       return affectedKeys.hasOnly(allowedFields);
@@ -110,7 +110,6 @@ service cloud.firestore {
       docData.link is string &&
       docData.notice is string &&
       docData.notification is string &&
-      docData.sent is string &&
       docData.timestamp is number &&
       docData.title is string;
     }
@@ -133,6 +132,18 @@ service cloud.firestore {
       docData.introduction is string &&
       docData.title is string &&
       docData.video is string;
+    }
+
+    function memberFieldsTypeValidate(docData) {
+      return docData.timestamp is number &&
+      docData.course is string &&
+      docData.email is string &&
+      docData.paymentStatus is bool &&
+      docData.enrollmentNumber is string &&
+      docData.facultyNumber is string &&
+      docData.mobile is string &&
+      docData.name is string &&
+      docData.registrationNumber is string
     }
 
     // Collection Access Rules
@@ -206,7 +217,7 @@ service cloud.firestore {
 
     match /news/{newsId} {
       allow read;
-      allow create: if isAdmin() && documentFieldsCheckOut(["date", "link", "notice", "notification", "sent", "timestamp", "title"], []) && newsFieldsTypeValidate(request.resource.data);
+      allow create: if isAdmin() && documentFieldsCheckOut(["date", "link", "notice", "notification", "timestamp", "title"], ["sent"]) && newsFieldsTypeValidate(request.resource.data);
       allow update: if isAdmin() && editOnlyChangesField(["date", "link", "notice", "notification", "sent", "timestamp", "title"]) && newsFieldsTypeValidate(request.resource.data);
       allow delete: if isAdmin();
     }
@@ -224,12 +235,14 @@ service cloud.firestore {
     }
 
     match /members/{membersId} {
-      allow read, update, delete: if isAdmin();
-      allow create;
+      allow read, delete: if isAdmin();
+      allow create: if documentFieldsCheckOut(['timestamp', 'course', 'email', 'paymentStatus', 'enrollmentNumber', 'facultyNumber', 'mobile', 'name', 'registrationNumber'], []) && memberFieldsTypeValidate(request.resource.data);
+      allow update: if isAdmin() && editOnlyChangesField(['timestamp', 'course', 'email', 'paymentStatus', 'enrollmentNumber', 'facultyNumber', 'mobile', 'name', 'registrationNumber']) && memberFieldsTypeValidate(request.resource.data);
     }
 
     match /facultyNumbers/{facultyNumbersId} {
-      allow read, create, update: if isAdmin();
+      allow read, create;
+      allow delete, update: if isAdmin();
     }
 
     // Overall default Access
